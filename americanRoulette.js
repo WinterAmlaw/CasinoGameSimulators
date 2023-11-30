@@ -31,6 +31,33 @@ class AmericanRoulette {
       case 'number':
         win = outcome === chosenNumber;
         break;
+      //I'm only doing vertical splits for now
+      case 'split':
+        win = outcome === chosenNumber || outcome === chosenNumber + 1;
+        break;
+      //select the first number in the street for this to work properly
+      case 'street':
+        win = outcome === chosenNumber || outcome === chosenNumber + 1 || outcome === chosenNumber + 2;
+        break;
+      //Corner and line are not ready yet, algorithm needs to account for cases where the number is not the first in the selected area
+      // case 'corner':
+      //   win = outcome === chosenNumber || outcome === chosenNumber + 1 || outcome === chosenNumber + 3 || outcome === chosenNumber + 4;
+      //   break;
+      // case 'line':
+      //   win = outcome === chosenNumber || outcome === chosenNumber + 1 || outcome === chosenNumber + 2 || outcome === chosenNumber + 3 || outcome === chosenNumber + 4 || outcome === chosenNumber + 5;
+      //   break;
+      case 'low':
+        win = parseInt(outcome) >= 1 && parseInt(outcome) <= 18;
+        break;
+      case 'high':
+        win = parseInt(outcome) >= 19 && parseInt(outcome) <= 36;
+        break;
+      case 'even':
+        win = parseInt(outcome) % 2 === 0 && outcome !== '0' && outcome !== '00';
+        break;
+      case 'odd':
+        win = parseInt(outcome) % 2 === 1;
+        break;
       case 'dozen1':
         win = parseInt(outcome) >= 1 && parseInt(outcome) <= 12;
         break;
@@ -58,7 +85,24 @@ class AmericanRoulette {
     switch (betType) {
       case 'number':
         return 35;
+      case 'split':
+        return 17;
+      case 'street':
+        return 11;  
+      case 'corner':
+        return 8;
+      case 'line':
+        return 5;
+      case 'low':
+        return 1;
+      case 'high':
+        return 1;
+      case 'even':
+        return 1;
+      case 'odd':
+        return 1;
       case 'red':
+        return 1;
       case 'black':
         return 1;
       default:

@@ -20,6 +20,7 @@ class AmericanRoulette {
   bet(amount, betType, chosenNumber = null) {
     const outcome = this.spinWheel();
     let win = false;
+    console.log(`NEW SPIN ---- Outcome: ${outcome}`);
 
     switch (betType) {
       case 'red':
@@ -31,21 +32,20 @@ class AmericanRoulette {
       case 'number':
         win = outcome === chosenNumber;
         break;
-      //I'm only doing vertical splits for now
+      //Only vertical splits for now
+      //For all bets on multiple numbers, select the lowest number in the desired area
       case 'split':
         win = outcome === chosenNumber || outcome === chosenNumber + 1;
         break;
-      //select the first number in the street for this to work properly
       case 'street':
         win = outcome === chosenNumber || outcome === chosenNumber + 1 || outcome === chosenNumber + 2;
         break;
-      //Corner and line are not ready yet, algorithm needs to account for cases where the number is not the first in the selected area
-      // case 'corner':
-      //   win = outcome === chosenNumber || outcome === chosenNumber + 1 || outcome === chosenNumber + 3 || outcome === chosenNumber + 4;
-      //   break;
-      // case 'line':
-      //   win = outcome === chosenNumber || outcome === chosenNumber + 1 || outcome === chosenNumber + 2 || outcome === chosenNumber + 3 || outcome === chosenNumber + 4 || outcome === chosenNumber + 5;
-      //   break;
+      case 'corner':
+        win = outcome === chosenNumber || outcome === chosenNumber + 1 || outcome === chosenNumber + 3 || outcome === chosenNumber + 4;
+        break;
+      case 'line':
+        win = outcome === chosenNumber || outcome === chosenNumber + 1 || outcome === chosenNumber + 2 || outcome === chosenNumber + 3 || outcome === chosenNumber + 4 || outcome === chosenNumber + 5;
+        break;
       case 'low':
         win = parseInt(outcome) >= 1 && parseInt(outcome) <= 18;
         break;
@@ -76,6 +76,12 @@ class AmericanRoulette {
       case 'column3':
         win = parseInt(outcome) % 3 === 0 && outcome !== '0' && outcome !== '00';
         break;
+    }
+
+    if(win){
+      console.log('Win!')
+    } else {
+      console.log('Loss');
     }
 
     return win ? amount * this.getPayout(betType) : -amount;
@@ -112,46 +118,67 @@ class AmericanRoulette {
 }
 
 class RoulettePlayer {
-  constructor(strategy) {
+  constructor(strategy, initialBet) {
     this.roulette = new AmericanRoulette();
     this.strategy = strategy;
     this.fibonacciSequence = [1, 1];
+    this.initialBet = initialBet;
+    this.betAmount = initialBet;
   }
 
-  playRound(bets, initialBetAmount) {
+  playRound(bets, initialBetAmount, maxBetAmount, bankroll) {
     let totalProfit = 0;
-    let betAmount = initialBetAmount;
+    let initialBet = this.initialBet;
+    let betAmount = this.betAmount;
+    // let maxBet = maxBetAmount || Infinity;
+    // let bank = bankroll || Infinity;
 
     bets.forEach(bet => {
+      console.log(betAmount);
       const profit = this.roulette.bet(betAmount, bet.type, bet.number);
       totalProfit += profit;
-      betAmount = this.updateBetAmount(profit, betAmount);
+      // bank += profit;
+      // if(profit > 0) {
+      //   betAmount = initialBetAmount;
+      //   this.fibonacciSequence = [1, 1];
+      // } else {
+        this.betAmount = this.updateBetAmount(profit, betAmount, initialBet);
+      // }
+      console.log(`Bet: $${betAmount} | Profit: $${profit}`);
+      // if(betAmount > maxBet) betAmount = initialBetAmount;
+      // console.log(bank);
+      // if(bank <= 0) return 0;
     });
 
     return totalProfit;
   }
 
-  updateBetAmount(profit, currentBet) {
+  updateBetAmount(profit, currentBet, initialBet) {
     if (profit < 0) {
       if (this.strategy === 'martingale') {
         return currentBet * 2;
       } else if (this.strategy === 'fibonacci') {
         this.fibonacciSequence.push(this.fibonacciSequence.at(-1) + this.fibonacciSequence.at(-2));
-        return this.fibonacciSequence.at(-1);
+        return initialBet * this.fibonacciSequence.at(-1);
       }
+    } else {
+      currentBet = initialBet;
+      this.fibonacciSequence = [0, 1];
     }
     return currentBet;
   }
 }
 
-const player = new RoulettePlayer('martingale');
-let totalProfit = 0;
 const initialBet = 10;
+const player = new RoulettePlayer('fibonacci', initialBet);
+let totalProfit = 0;
 const spins = 100;
-const bets = [{ type: 'dozen1' }, { type: 'dozen2' }];
+const maxBet = 1000;
+const bankroll = 1000;
+const bets = [{ type: 'dozen1' }];
 
 for (let i = 0; i < spins; i++) {
-  totalProfit += player.playRound(bets, initialBet);
+  totalProfit += player.playRound(bets, initialBet, maxBet, bankroll);
 }
 
 console.log(`Total Profit/Loss after ${spins} spins: $${totalProfit}`);

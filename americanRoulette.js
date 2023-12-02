@@ -169,18 +169,23 @@ class RoulettePlayer {
   }
 }
 
-const initialBet = 10;
-const player = new RoulettePlayer('fibonacci', initialBet);
-let totalProfit = 0;
-const spins = 100;
-const maxBet = 1000;
-const bankroll = 1000;
-const bets = [{ type: 'dozen1' }];
+function runSimulation() {
+  const strategy = document.getElementById('strategy').value;
+  const initialBet = parseInt(document.getElementById('initialBet').value);
+  const maxBet = parseInt(document.getElementById('maxBet').value);
+  const spins = parseInt(document.getElementById('spins').value);
 
-for (let i = 0; i < spins; i++) {
-  totalProfit += player.playRound(bets, initialBet, maxBet, bankroll);
+  const player = new RoulettePlayer(strategy, initialBet);
+  let totalProfit = 0;
+
+  for (let i = 0; i < spins; i++) {
+      totalProfit += player.playRound([{ type: 'dozen1' }], initialBet, maxBet);
+  }
+
+  const resultsDiv = document.getElementById('results');
+  resultsDiv.innerHTML = `Total Profit/Loss after ${spins} spins: $${totalProfit}`;
 }
 
-console.log(`Total Profit/Loss after ${spins} spins: $${totalProfit}`);
+// console.log(`Total Profit/Loss after ${spins} spins: $${totalProfit}`);
 
   

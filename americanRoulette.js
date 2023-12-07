@@ -171,6 +171,8 @@ class RoulettePlayer {
 
 function runSimulation() {
   const strategy = document.getElementById('strategy').value;
+  const betType = document.getElementById('betType').value;
+  const chosenNumber = betType === 'number' ? document.getElementById('chosenNumber').value : null;
   const initialBet = parseInt(document.getElementById('initialBet').value);
   const maxBet = parseInt(document.getElementById('maxBet').value);
   const spins = parseInt(document.getElementById('spins').value);
@@ -179,12 +181,23 @@ function runSimulation() {
   let totalProfit = 0;
 
   for (let i = 0; i < spins; i++) {
-      totalProfit += player.playRound([{ type: 'dozen1' }], initialBet, maxBet);
+      totalProfit += player.playRound([{ type: betType, number: chosenNumber }], initialBet, maxBet);
   }
 
   const resultsDiv = document.getElementById('results');
   resultsDiv.innerHTML = `Total Profit/Loss after ${spins} spins: $${totalProfit}`;
 }
+
+document.getElementById('betType').addEventListener('change', function() {
+  const betType = this.value;
+  const numberSelectionDiv = document.getElementById('numberSelection');
+  if (betType === 'number') {
+      numberSelectionDiv.style.display = '';
+  } else {
+      numberSelectionDiv.style.display = 'none';
+  }
+});
+
 
 // console.log(`Total Profit/Loss after ${spins} spins: $${totalProfit}`);
 
